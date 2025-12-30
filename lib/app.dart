@@ -1,4 +1,5 @@
 import 'package:finance_ai_app/src/constants/colors.dart';
+import 'package:finance_ai_app/src/features/auth/presentation/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
           margin: EdgeInsets.zero,
         ),
       ),
-      home: const MyHomePage(title: 'Finance AI'),
+      home: const LoginScreen(),
     );
   }
 }

@@ -12,7 +12,20 @@
           "package_name": "com.example.finance_ai_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "494101639150-dc1np5r29lvtd9eg76eli1a75sq2skgm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.finance_ai_app",
+            "certificate_hash": "33faa66aca659547c1edccde738e7939242fe9b3"
+          }
+        },
+        {
+          "client_id": "494101639150-22muuog06flt94gqhdo4mng21nslquai.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCn9hesf79JsaXU7pYqNlA6tWvIxqXVunc"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "494101639150-22muuog06flt94gqhdo4mng21nslquai.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "494101639150-0kkkmhad6mk9m649bjccqk73vcjjvsgh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.financeAiApp"
+              }
+            }
+          ]
         }
       }
     }
