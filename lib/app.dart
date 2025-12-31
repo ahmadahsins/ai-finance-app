@@ -1,11 +1,8 @@
 import 'package:finance_ai_app/src/constants/colors.dart';
-import 'package:finance_ai_app/src/features/auth/presentation/login_screen.dart';
 import 'package:finance_ai_app/src/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import 'home_page.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});

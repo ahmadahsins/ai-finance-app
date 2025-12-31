@@ -1,7 +1,6 @@
-import 'package:finance_ai_app/src/features/auth/application/auth_controller.dart';
 import 'package:finance_ai_app/src/common_widgets/styled_button.dart';
-import 'package:finance_ai_app/src/common_widgets/custom_text.dart';
-import 'package:finance_ai_app/src/features/dashboard/presentation/home_screen.dart';
+import 'package:finance_ai_app/src/common_widgets/styled_text.dart';
+import 'package:finance_ai_app/src/features/auth/application/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
