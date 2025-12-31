@@ -1,5 +1,5 @@
 import 'package:finance_ai_app/src/features/auth/application/auth_controller.dart';
-import 'package:finance_ai_app/src/common_widgets/primary_button.dart';
+import 'package:finance_ai_app/src/common_widgets/styled_button.dart';
 import 'package:finance_ai_app/src/common_widgets/custom_text.dart';
 import 'package:finance_ai_app/src/features/dashboard/presentation/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +16,6 @@ class LoginScreen extends ConsumerWidget {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(error.toString())));
-        },
-        data: (_) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
         },
       );
     });
@@ -43,7 +38,7 @@ class LoginScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 48),
-              PrimaryButton(
+              StyledButton(
                 text: 'Continue with Google',
                 iconPath: 'assets/google-icon-logo.svg',
                 isLoading: isLoading,

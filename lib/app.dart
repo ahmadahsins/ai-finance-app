@@ -1,16 +1,21 @@
 import 'package:finance_ai_app/src/constants/colors.dart';
 import 'package:finance_ai_app/src/features/auth/presentation/login_screen.dart';
+import 'package:finance_ai_app/src/routing/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'home_page.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(goRouterProvider);
+
+    return MaterialApp.router(
+      routerConfig: router,
       title: 'Finance AI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -66,7 +71,6 @@ class MyApp extends StatelessWidget {
           margin: EdgeInsets.zero,
         ),
       ),
-      home: const LoginScreen(),
     );
   }
 }

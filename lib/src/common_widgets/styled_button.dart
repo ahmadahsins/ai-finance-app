@@ -2,20 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:finance_ai_app/src/constants/colors.dart';
 
-class PrimaryButton extends StatelessWidget {
+class StyledButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final String? iconPath;
   final bool isLoading;
   final bool isFullWidth;
+  final Color color;
 
-  const PrimaryButton({
+  const StyledButton({
     super.key,
     required this.text,
     this.onPressed,
     this.iconPath,
     this.isLoading = false,
     this.isFullWidth = true,
+    this.color = AppColors.primary,
   });
 
   @override
@@ -58,7 +60,7 @@ class PrimaryButton extends StatelessWidget {
           );
 
     final ButtonStyle style = ElevatedButton.styleFrom(
-      backgroundColor: AppColors.primary,
+      backgroundColor: color,
       foregroundColor: AppColors.textOnPrimary,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
