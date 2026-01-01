@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key});
@@ -48,14 +49,46 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   void _onClear() => setState(() => _amountStr = "");
 
+  void _showTopToast(String message, {bool isError = false}) {
+    toastification.show(
+      context: context,
+      type: isError ? ToastificationType.error : ToastificationType.success,
+      style: ToastificationStyle.flatColored,
+      title: Text(
+        isError ? 'Oops!' : 'Success',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      description: Text(message),
+      alignment: Alignment.topCenter,
+      autoCloseDuration: const Duration(seconds: 3),
+      borderRadius: BorderRadius.circular(12.0),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x07000000),
+          blurRadius: 16,
+          offset: Offset(0, 16),
+          spreadRadius: 0,
+        ),
+      ],
+      showProgressBar: false,
+      animationBuilder: (context, animation, alignment, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -1),
+            end: const Offset(0, 0),
+          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+          child: child,
+        );
+      },
+    );
+  }
+
   void _submit() {
     final amount = double.tryParse(_amountStr);
     if (amount == null || amount <= 0) {
       setState(() {
         _isNumpadVisible = true;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Please enter an amount')));
+        _showTopToast('Please enter an amount', isError: true);
       });
       return;
     }
@@ -112,14 +145,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     final topPadding = MediaQuery.of(context).padding.top;
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     final filteredCategories = kCategories
         .where((cat) => cat.type == _selectedType)
         .toList();
+
     if (!filteredCategories.contains(_selectedCategory)) {
-      // Safe reset category
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() => _selectedCategory = filteredCategories.first);
@@ -127,17 +161,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       });
     }
 
-    ref.listen<AsyncValue<void>>(transactionControllerProvider, (prev, next) {
+    ref.listen<AsyncValue<void>>(transactionControllerProvider, (
+      prev,
+      next,
+    ) async {
       next.whenOrNull(
-        data: (_) {
-          context.pop();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Transaction Saved!')));
+        data: (_) async {
+          if (mounted) context.pop();
+          _showTopToast('Transaction Saved!');
         },
-        error: (e, s) => ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString()))),
+        error: (e, s) {
+          _showTopToast(e.toString(), isError: true);
+        },
       );
     });
 
@@ -148,7 +183,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         children: [
           Positioned.fill(
             child: GestureDetector(
-              onTap: () => setState(() => _isNumpadVisible = false),
+              onTap: () {
+                setState(() => _isNumpadVisible = false);
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(
                   left: 24,
@@ -193,65 +231,69 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) => SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 1),
-                  end: const Offset(0, 0),
-                ).animate(animation),
-                child: child,
-              ),
-              child: _isNumpadVisible
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 0),
-                      child: CustomNumpad(
-                        onNumberTap: _onNumberTap,
-                        onBackspaceTap: _onBackspace,
-                        onClearTap: _onClear,
-                        onHideTap: () =>
-                            setState(() => _isNumpadVisible = false),
-                        onEnterTap: () =>
-                            setState(() => _isNumpadVisible = false),
-                        isSubmitEnabled: _amountStr.isNotEmpty,
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey('save_button'),
-                      width: double.infinity,
-                      padding: EdgeInsets.only(
-                        left: 24,
-                        right: 24,
-                        top: 24,
-                        bottom: bottomPadding + 24,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            AppColors.background.withValues(alpha: 0.0),
-                            AppColors.background,
-                          ],
-                          stops: const [0.0, 0.3],
+          if (!isKeyboardVisible)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) => SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: const Offset(0, 0),
+                  ).animate(animation),
+                  child: child,
+                ),
+                child: _isNumpadVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(bottom: 0),
+                        child: CustomNumpad(
+                          onNumberTap: _onNumberTap,
+                          onBackspaceTap: _onBackspace,
+                          onClearTap: _onClear,
+                          onHideTap: () =>
+                              setState(() => _isNumpadVisible = false),
+                          onEnterTap: () =>
+                              setState(() => _isNumpadVisible = false),
+                          isSubmitEnabled: _amountStr.isNotEmpty,
+                        ),
+                      )
+                    : Container(
+                        key: const ValueKey('save_button'),
+                        width: double.infinity,
+                        padding: EdgeInsets.only(
+                          left: 24,
+                          right: 24,
+                          top: 24,
+                          bottom: bottomPadding + 24,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.background.withValues(alpha: 0.0),
+                              AppColors.background,
+                            ],
+                            stops: const [0.0, 0.3],
+                          ),
+                        ),
+                        child: StyledButton(
+                          text: 'Save',
+                          onPressed: isLoading ? null : _submit,
+                          isLoading: isLoading,
                         ),
                       ),
-                      child: StyledButton(
-                        text: 'Save',
-                        onPressed: isLoading ? null : _submit,
-                        isLoading: isLoading,
-                      ),
-                    ),
+              ),
             ),
-          ),
         ],
       ),
     );
   }
+
+  // ... (Widget helper _buildHeader, _buildAmountDisplay, dll SAMA PERSIS)
+  // Copy dari kode sebelumnya
 
   Widget _buildHeader() {
     return Padding(
@@ -300,31 +342,33 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               fontSize: 12,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Text(
-              //   'Rp',
-              //   style: TextStyle(
-              //     fontSize: 24,
-              //     fontWeight: FontWeight.bold,
-              //     color: AppColors.textSecondary,
-              //   ),
-              // ),
-              // const SizedBox(width: 8),
-              Text(
-                _amountStr.isEmpty
-                    ? currencyFormatter.format(0)
-                    : currencyFormatter.format(
-                        double.tryParse(_amountStr) ?? 0,
-                      ),
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+          const SizedBox(height: 8),
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
               ),
-            ],
+              children: [
+                TextSpan(
+                  text: 'Rp ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                TextSpan(
+                  text: _amountStr.isEmpty
+                      ? "0"
+                      : NumberFormat(
+                          "#,###",
+                          "id_ID",
+                        ).format(double.tryParse(_amountStr) ?? 0),
+                  style: const TextStyle(fontSize: 48),
+                ),
+              ],
+            ),
           ),
         ],
       ),
