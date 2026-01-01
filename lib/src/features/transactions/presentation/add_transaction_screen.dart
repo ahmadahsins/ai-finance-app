@@ -1,5 +1,6 @@
 import 'package:finance_ai_app/src/common_widgets/styled_button.dart';
 import 'package:finance_ai_app/src/constants/colors.dart';
+import 'package:finance_ai_app/src/features/transactions/application/transaction_controller.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/category_item.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/transaction_model.dart';
 import 'package:finance_ai_app/src/features/transactions/presentation/widgets/custom_numpad.dart';
@@ -19,7 +20,7 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
 
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   // state
-  String _amountStr = "0";
+  String _amountStr = "";
   TransactionType _selectedType = TransactionType.expense;
   CategoryItem _selectedCategory = kCategories.first;
   final TextEditingController _noteController = TextEditingController();
@@ -46,6 +47,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _onClear() => setState(() => _amountStr = "");
+
+  void _submit() {
+    final amount = double.tryParse(_amountStr);
+    if (amount == null || amount <= 0) {
+      setState(() {
+        _isNumpadVisible = true;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Please enter an amount')));
+      });
+      return;
+    }
+
+    ref
+        .read(transactionControllerProvider.notifier)
+        .addTransaction(
+          amount: amount,
+          type: _selectedType,
+          category: _selectedCategory.name,
+          description: _noteController.text,
+          date: _selectedDate,
+        );
+  }
 
   final currencyFormatter = NumberFormat.currency(
     locale: 'id_ID',
@@ -102,6 +126,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         }
       });
     }
+
+    ref.listen<AsyncValue<void>>(transactionControllerProvider, (prev, next) {
+      next.whenOrNull(
+        data: (_) {
+          context.pop();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Transaction Saved!')));
+        },
+        error: (e, s) => ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString()))),
+      );
+    });
+
+    final isLoading = ref.watch(transactionControllerProvider).isLoading;
 
     return Scaffold(
       body: Stack(
@@ -173,10 +213,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         onNumberTap: _onNumberTap,
                         onBackspaceTap: _onBackspace,
                         onClearTap: _onClear,
-                        onCalendarTap: _pickDate,
-                        onSubmit: () {},
-                        isLoading: false,
-                        isSubmitEnabled: true,
+                        onHideTap: () =>
+                            setState(() => _isNumpadVisible = false),
+                        onEnterTap: () =>
+                            setState(() => _isNumpadVisible = false),
+                        isSubmitEnabled: _amountStr.isNotEmpty,
                       ),
                     )
                   : Container(
@@ -201,8 +242,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                       child: StyledButton(
                         text: 'Save',
-                        onPressed: () {},
-                        isLoading: false,
+                        onPressed: isLoading ? null : _submit,
+                        isLoading: isLoading,
                       ),
                     ),
             ),

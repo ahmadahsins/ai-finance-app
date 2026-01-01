@@ -5,9 +5,8 @@ class CustomNumpad extends StatelessWidget {
   final Function(String) onNumberTap;
   final VoidCallback onBackspaceTap;
   final VoidCallback onClearTap;
-  final VoidCallback onCalendarTap;
-  final VoidCallback onSubmit;
-  final bool isLoading;
+  final VoidCallback onHideTap;
+  final VoidCallback onEnterTap;
   final bool isSubmitEnabled;
 
   const CustomNumpad({
@@ -15,9 +14,8 @@ class CustomNumpad extends StatelessWidget {
     required this.onNumberTap,
     required this.onBackspaceTap,
     required this.onClearTap,
-    required this.onCalendarTap,
-    required this.onSubmit,
-    required this.isLoading,
+    required this.onHideTap,
+    required this.onEnterTap,
     required this.isSubmitEnabled,
   });
 
@@ -88,10 +86,10 @@ class CustomNumpad extends StatelessWidget {
                   _buildNumKey('8'),
                   _buildNumKey('9'),
                   _buildActionKey(
-                    icon: Icons.calendar_today_rounded,
+                    icon: Icons.keyboard_hide_rounded,
                     bg: Colors.grey[100]!,
                     color: Colors.black,
-                    onTap: onCalendarTap,
+                    onTap: onHideTap,
                   ),
                 ],
               ),
@@ -100,20 +98,18 @@ class CustomNumpad extends StatelessWidget {
               // --- Row 4: DOT, 0, SAVE BUTTON (Expanded) ---
               Row(
                 children: [
-                  _buildNumKey('.'),
+                  _buildNumKey('000'),
                   const SizedBox(width: 16), // Spasi antar tombol
                   _buildNumKey('0'),
                   const SizedBox(width: 16),
 
-                  // Tombol SAVE yang mengambil sisa ruang (2 kolom)
+                  // Tombol ENTER yang mengambil sisa ruang (2 kolom)
                   Expanded(
                     flex: 2, // Lebar 2x lipat tombol biasa
                     child: SizedBox(
                       height: 72, // Tinggi disamakan dengan tombol angka
                       child: ElevatedButton(
-                        onPressed: (isSubmitEnabled && !isLoading)
-                            ? onSubmit
-                            : null,
+                        onPressed: (isSubmitEnabled) ? onEnterTap : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
@@ -121,23 +117,14 @@ class CustomNumpad extends StatelessWidget {
                           ),
                           elevation: 0,
                         ),
-                        child: isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 3,
-                                ),
-                              )
-                            : const Text(
-                                "SAVE",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                        child: const Text(
+                          "ENTER",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -165,8 +152,8 @@ class CustomNumpad extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: const TextStyle(
-            fontSize: 24,
+          style: TextStyle(
+            fontSize: label.length > 2 ? 18 : 24,
             fontWeight: FontWeight.bold,
             color: Color(0xFF1C1C1E),
           ),
