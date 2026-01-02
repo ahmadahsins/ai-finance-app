@@ -3,12 +3,15 @@ import 'package:finance_ai_app/src/constants/colors.dart';
 import 'package:finance_ai_app/src/features/transactions/application/transaction_controller.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/category_item.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/transaction_model.dart';
+import 'package:finance_ai_app/src/features/transactions/presentation/widgets/add_transaction_header.dart';
+import 'package:finance_ai_app/src/features/transactions/presentation/widgets/amount_display_card.dart';
+import 'package:finance_ai_app/src/features/transactions/presentation/widgets/category_selector_list.dart';
 import 'package:finance_ai_app/src/features/transactions/presentation/widgets/custom_numpad.dart';
+import 'package:finance_ai_app/src/features/transactions/presentation/widgets/transaction_input_form.dart';
 import 'package:finance_ai_app/src/features/transactions/presentation/widgets/transaction_type_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:toastification/toastification.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -34,6 +37,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     super.dispose();
   }
 
+  // logic methods
   void _onNumberTap(String value) {
     if (_amountStr == "0") _amountStr = "";
     if (_amountStr.length < 10) setState(() => _amountStr += value);
@@ -104,12 +108,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
   }
 
-  final currencyFormatter = NumberFormat.currency(
-    locale: 'id_ID',
-    symbol: 'Rp ',
-    decimalDigits: 0,
-  );
-
   Future<void> _pickDate() async {
     setState(() => _isNumpadVisible = false);
     FocusManager.instance.primaryFocus?.unfocus();
@@ -141,6 +139,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _selectedDate = picked;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _isNumpadVisible = true;
+        });
+      }
+    });
   }
 
   @override
@@ -196,7 +206,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildHeader(),
+                    AddTransactionHeader(),
 
                     const SizedBox(height: 16),
                     TransactionTypeToggle(
@@ -210,21 +220,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                     const SizedBox(height: 24),
 
-                    GestureDetector(
+                    AmountDisplayCard(
+                      amountStr: _amountStr,
                       onTap: () {
                         FocusManager.instance.primaryFocus?.unfocus();
                         setState(() => _isNumpadVisible = true);
                       },
-                      child: _buildAmountDisplay(),
+                      isNumpadVisible: _isNumpadVisible,
                     ),
 
                     const SizedBox(height: 24),
 
-                    _buildCategorySelector(filteredCategories),
+                    CategorySelectorList(
+                      categories: filteredCategories,
+                      selectedCategory: _selectedCategory,
+                      onCategorySelected: (cat) => setState(() {
+                        _selectedCategory = cat;
+                      }),
+                    ),
 
                     const SizedBox(height: 24),
 
-                    _buildInputFields(),
+                    TransactionInputForm(
+                      noteController: _noteController,
+                      selectedDate: _selectedDate,
+                      onTapNote: () => setState(() {
+                        _isNumpadVisible = false;
+                      }),
+                      onPickDate: _pickDate,
+                    ),
                   ],
                 ),
               ),
@@ -289,246 +313,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
         ],
       ),
-    );
-  }
-
-  // ... (Widget helper _buildHeader, _buildAmountDisplay, dll SAMA PERSIS)
-  // Copy dari kode sebelumnya
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            child: IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textPrimary),
-              onPressed: () => context.pop(),
-            ),
-          ),
-          const Expanded(
-            child: Text(
-              "Add Transaction",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 40),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAmountDisplay() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Column(
-        children: [
-          Text(
-            "ENTER AMOUNT",
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 8),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Rp ',
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                TextSpan(
-                  text: _amountStr.isEmpty
-                      ? "0"
-                      : NumberFormat(
-                          "#,###",
-                          "id_ID",
-                        ).format(double.tryParse(_amountStr) ?? 0),
-                  style: const TextStyle(fontSize: 48),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategorySelector(List<CategoryItem> categories) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Select Category",
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            Text('See all', style: TextStyle(color: AppColors.primary)),
-          ],
-        ),
-        Container(
-          height: 100,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ListView.separated(
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final cat = categories[index];
-              final isSelected = _selectedCategory.id == cat.id;
-              return _buildCategoryItem(cat, isSelected);
-            },
-            separatorBuilder: (context, index) {
-              return const SizedBox(width: 8);
-            },
-            scrollDirection: Axis.horizontal,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryItem(CategoryItem cat, bool isSelected) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedCategory = cat;
-        });
-      },
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(2),
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: isSelected
-                  ? Border.all(color: AppColors.primary, width: 4)
-                  : null,
-            ),
-            child: CircleAvatar(
-              radius: 28,
-              backgroundColor: cat.color,
-              child: Icon(cat.icon, color: AppColors.background),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            cat.name,
-            style: TextStyle(
-              color: isSelected
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInputFields() {
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: TextField(
-            controller: _noteController,
-            onTap: () {
-              setState(() => _isNumpadVisible = false);
-            },
-            decoration: InputDecoration(
-              hintText: 'Write a note (Optional)',
-              hintStyle: TextStyle(color: AppColors.textSecondary),
-              prefixIcon: Icon(
-                Icons.description_outlined,
-                color: AppColors.textSecondary,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        GestureDetector(
-          onTap: () => _pickDate(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_rounded,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    DateFormat('EEEE, MMM d, y').format(_selectedDate),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.textPrimary),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
