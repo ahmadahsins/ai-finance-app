@@ -1,3 +1,4 @@
+import 'package:finance_ai_app/src/features/auth/data/auth_repository.dart';
 import 'package:finance_ai_app/src/features/dashboard/domain/transaction_summary.dart';
 import 'package:finance_ai_app/src/features/transactions/data/transaction_repository.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/transaction_model.dart';
@@ -7,9 +8,13 @@ part 'dashboard_controller.g.dart';
 
 @riverpod
 Stream<List<TransactionModel>> dashboardTransactions(Ref ref) {
-  const String currentUid = 'Ir0UUL2tuvP1mwxev3lQhNLGvgF2';
+  final userAsync = ref.watch(authStateChangesProvider);
+  final user = userAsync.value;
+  if (user == null) {
+    return Stream.value([]);
+  }
 
-  return ref.watch(transactionRepositoryProvider).watchTransactions(currentUid);
+  return ref.watch(transactionRepositoryProvider).watchTransactions(user.uid);
 }
 
 @riverpod

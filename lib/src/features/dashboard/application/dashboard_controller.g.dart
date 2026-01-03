@@ -49,7 +49,7 @@ final class DashboardTransactionsProvider
 }
 
 String _$dashboardTransactionsHash() =>
-    r'e4459849740aa6dd042f78a1e10fdac3facfefc8';
+    r'00e006c7e4e2c4ccb6658316a66e6d844d4f08fb';
 
 @ProviderFor(transactionSummary)
 final transactionSummaryProvider = TransactionSummaryProvider._();
