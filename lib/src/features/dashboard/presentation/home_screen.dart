@@ -18,7 +18,6 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(authStateChangesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

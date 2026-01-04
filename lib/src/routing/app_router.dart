@@ -3,6 +3,7 @@ import 'package:finance_ai_app/src/features/auth/presentation/login_screen.dart'
 import 'package:finance_ai_app/src/features/dashboard/presentation/home_screen.dart';
 import 'package:finance_ai_app/src/features/profile/presentation/profile_screen.dart';
 import 'package:finance_ai_app/src/features/transactions/presentation/add_transaction_screen.dart';
+import 'package:finance_ai_app/src/features/transactions/presentation/history_screen.dart';
 import 'package:finance_ai_app/src/routing/scaffold_with_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -44,8 +45,7 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: '/history',
                 name: 'history',
-                builder: (context, state) =>
-                    const Scaffold(body: Center(child: Text('History'))),
+                builder: (context, state) => const HistoryScreen(),
               ),
             ],
           ),
