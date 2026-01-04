@@ -40,6 +40,16 @@ class TransactionRepository {
   }) async {
     await _userTransactions(uid).doc(transactionId).delete();
   }
+
+  Future<DateTime?> getOldestTransactionDate(String uid) async {
+    final snapshot = await _userTransactions(
+      uid,
+    ).orderBy('date', descending: false).limit(1).get();
+
+    if (snapshot.docs.isEmpty) return null;
+
+    return TransactionModel.fromJson(snapshot.docs.first.data()).date;
+  }
 }
 
 @Riverpod(keepAlive: true)

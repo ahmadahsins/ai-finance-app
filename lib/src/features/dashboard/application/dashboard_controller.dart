@@ -8,11 +8,8 @@ part 'dashboard_controller.g.dart';
 
 @riverpod
 Stream<List<TransactionModel>> dashboardTransactions(Ref ref) {
-  final userAsync = ref.watch(authStateChangesProvider);
-  final user = userAsync.value;
-  if (user == null) {
-    return Stream.value([]);
-  }
+  final user = ref.read(authStateChangesProvider).value;
+  if (user == null) return Stream.value([]);
 
   return ref.watch(transactionRepositoryProvider).watchTransactions(user.uid);
 }

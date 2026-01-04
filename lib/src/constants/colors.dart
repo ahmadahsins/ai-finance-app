@@ -4,7 +4,7 @@ class AppColors {
   AppColors._(); // Private constructor to prevent instantiation
 
   // Brand Colors
-  static const Color primary = Color(0xFF56C329); // Vibrant Green
+  static const Color primary = Color(0xFF58cc02); // Vibrant Green
   static const Color primaryDark = Color(
     0xFF3DA015,
   ); // Darker Green for press states
