@@ -79,8 +79,9 @@ class HistoryController extends _$HistoryController {
         .read(transactionRepositoryProvider)
         .getOldestTransactionDate(user.uid);
 
-    if (oldestDate == null)
+    if (oldestDate == null) {
       return [DateTime(DateTime.now().year, DateTime.now().month)];
+    }
 
     List<DateTime> months = [];
     DateTime currentDate = DateTime(DateTime.now().year, DateTime.now().month);
