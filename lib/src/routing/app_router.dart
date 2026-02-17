@@ -1,3 +1,4 @@
+import 'package:finance_ai_app/src/features/ai_chat/presentation/chat_screen.dart';
 import 'package:finance_ai_app/src/features/auth/data/auth_repository.dart';
 import 'package:finance_ai_app/src/features/auth/presentation/login_screen.dart';
 import 'package:finance_ai_app/src/features/dashboard/presentation/home_screen.dart';
@@ -54,8 +55,7 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: '/chat',
                 name: 'chat',
-                builder: (context, state) =>
-                    const Scaffold(body: Center(child: Text('Chat'))),
+                builder: (context, state) => const ChatScreen(),
               ),
             ],
           ),

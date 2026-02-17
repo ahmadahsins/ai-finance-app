@@ -6,7 +6,6 @@ import 'package:finance_ai_app/src/features/ai_chat/domain/chat_message.dart';
 import 'package:finance_ai_app/src/features/auth/data/auth_repository.dart';
 import 'package:finance_ai_app/src/features/transactions/data/transaction_repository.dart';
 import 'package:finance_ai_app/src/features/transactions/domain/transaction_model.dart';
-import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +15,6 @@ part 'chat_controller.g.dart';
 class ChatController extends _$ChatController {
   @override
   List<ChatMessage> build() {
-    // Add initial greeting message
     return [
       ChatMessage(
         id: const Uuid().v4(),
@@ -30,7 +28,6 @@ class ChatController extends _$ChatController {
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
-    // Add user message
     final userMessage = ChatMessage(
       id: const Uuid().v4(),
       content: text,
@@ -38,7 +35,6 @@ class ChatController extends _$ChatController {
       timestamp: DateTime.now(),
     );
 
-    // Add loading indicator
     final loadingMessage = ChatMessage(
       id: const Uuid().v4(),
       content: '',
@@ -53,11 +49,9 @@ class ChatController extends _$ChatController {
       final aiService = ref.read(aiServiceProvider);
       final responseText = await aiService.sendTextMessage(text);
 
-      // Parse response for transaction data
       final parsedTransaction = _tryParseTransaction(responseText);
       final cleanedContent = _cleanJsonFromResponse(responseText);
 
-      // Replace loading with actual response
       final botMessage = ChatMessage(
         id: loadingMessage.id,
         content: cleanedContent,
@@ -68,7 +62,6 @@ class ChatController extends _$ChatController {
 
       state = [...state.where((m) => m.id != loadingMessage.id), botMessage];
     } catch (e) {
-      // Replace loading with error message
       final errorMessage = ChatMessage(
         id: loadingMessage.id,
         content: 'Sorry, something went wrong. Please try again. 😅',
@@ -80,7 +73,6 @@ class ChatController extends _$ChatController {
   }
 
   Future<void> sendImage(Uint8List imageBytes, {String? caption}) async {
-    // Add user message showing image was sent
     final userMessage = ChatMessage(
       id: const Uuid().v4(),
       content: caption ?? '📷 Sent a receipt photo',
@@ -133,13 +125,13 @@ class ChatController extends _$ChatController {
   Future<bool> saveTransaction(TransactionModel transaction) async {
     try {
       final user = ref.read(authRepositoryProvider).currentUser;
+
       if (user == null) return false;
 
       await ref
           .read(transactionRepositoryProvider)
           .addTransaction(uid: user.uid, transaction: transaction);
 
-      // Add confirmation message
       final confirmMessage = ChatMessage(
         id: const Uuid().v4(),
         content:
@@ -174,10 +166,10 @@ class ChatController extends _$ChatController {
       }
       if (jsonStr == null) return null;
       final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-      final dateStr =
-          json['date'] as String? ??
-          DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final date = DateFormat('yyyy-MM-dd').parse(dateStr);
+
+      // Use current date since AI models don't have real-time date awareness
+      final date = DateTime.now();
+
       return TransactionModel(
         id: const Uuid().v4(),
         amount: (json['amount'] as num).toDouble(),
