@@ -249,7 +249,7 @@ final class HistoryControllerProvider
   HistoryController create() => HistoryController();
 }
 
-String _$historyControllerHash() => r'f7fbe0a7d87160b83ffb14a76230f1fa1c781d3d';
+String _$historyControllerHash() => r'2a1d1f867cc7dcba40afc43448150c0c0fe9875c';
 
 abstract class _$HistoryController extends $AsyncNotifier<void> {
   FutureOr<void> build();
