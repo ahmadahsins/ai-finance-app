@@ -6,6 +6,7 @@ import 'package:finance_ai_app/src/features/ai_chat/presentation/widgets/chat_in
 import 'package:finance_ai_app/src/features/ai_chat/presentation/widgets/transaction_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toastification/toastification.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -45,56 +46,75 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
-      body: Column(
+      body: Stack(
         children: [
-          // Date header
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _formatDateHeader(DateTime.now()),
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+          // Date header + Message list
+          Positioned.fill(
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                ? MediaQuery.of(context).viewInsets.bottom + 70
+                : 0,
+            child: Column(
+              children: [
+                // Date header
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _formatDateHeader(DateTime.now()),
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+
+                // Message list
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      return _buildMessageItem(message);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Message list
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                return _buildMessageItem(message);
+          // Input bar - positioned above keyboard
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            child: ChatInputBar(
+              onSendText: (text) {
+                ref.read(chatControllerProvider.notifier).sendMessage(text);
+              },
+              onSendImage: (bytes) {
+                ref.read(chatControllerProvider.notifier).sendImage(bytes);
               },
             ),
-          ),
-
-          // Input bar
-          ChatInputBar(
-            onSendText: (text) {
-              ref.read(chatControllerProvider.notifier).sendMessage(text);
-            },
-            onSendImage: (bytes) {
-              ref.read(chatControllerProvider.notifier).sendImage(bytes);
-            },
           ),
         ],
       ),
@@ -173,22 +193,54 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             const SizedBox(height: 8),
             TransactionCard(
               transaction: message.parsedTransaction!,
+              isSaved: message.isSaved,
               onSave: () async {
                 final success = await ref
                     .read(chatControllerProvider.notifier)
-                    .saveTransaction(message.parsedTransaction!);
+                    .saveTransaction(message.parsedTransaction!, message.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
-                            ? 'Transaction saved! 🎉'
-                            : 'Failed to save transaction',
-                      ),
-                      backgroundColor: success
-                          ? AppColors.primary
-                          : AppColors.expense,
+                  toastification.show(
+                    context: context,
+                    type: success
+                        ? ToastificationType.success
+                        : ToastificationType.error,
+                    style: ToastificationStyle.flatColored,
+                    title: Text(
+                      success ? 'Success' : 'Oops!',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
+                    description: Text(
+                      success
+                          ? 'Transaction saved! 🎉'
+                          : 'Failed to save transaction',
+                    ),
+                    alignment: Alignment.topCenter,
+                    autoCloseDuration: const Duration(seconds: 3),
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x07000000),
+                        blurRadius: 16,
+                        offset: Offset(0, 16),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                    showProgressBar: false,
+                    animationBuilder: (context, animation, alignment, child) {
+                      return SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0, -1),
+                              end: const Offset(0, 0),
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOut,
+                              ),
+                            ),
+                        child: child,
+                      );
+                    },
                   );
                 }
               },

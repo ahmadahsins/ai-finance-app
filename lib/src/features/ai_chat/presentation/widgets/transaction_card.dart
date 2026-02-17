@@ -7,11 +7,13 @@ import 'package:intl/intl.dart';
 class TransactionCard extends StatelessWidget {
   final TransactionModel transaction;
   final VoidCallback onSave;
+  final bool isSaved;
 
   const TransactionCard({
     super.key,
     required this.transaction,
     required this.onSave,
+    this.isSaved = false,
   });
 
   @override
@@ -122,12 +124,19 @@ class TransactionCard extends StatelessWidget {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: onSave,
-                    icon: const Icon(Icons.check, size: 16),
-                    label: const Text('Save'),
+                    onPressed: isSaved ? null : onSave,
+                    icon: Icon(
+                      isSaved ? Icons.check_circle : Icons.check,
+                      size: 16,
+                    ),
+                    label: Text(isSaved ? 'Saved' : 'Save'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: isSaved
+                          ? Colors.grey.shade300
+                          : AppColors.primary,
+                      foregroundColor: isSaved
+                          ? AppColors.textSecondary
+                          : Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,

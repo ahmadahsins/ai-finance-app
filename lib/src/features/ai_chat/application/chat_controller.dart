@@ -122,7 +122,10 @@ class ChatController extends _$ChatController {
     }
   }
 
-  Future<bool> saveTransaction(TransactionModel transaction) async {
+  Future<bool> saveTransaction(
+    TransactionModel transaction,
+    String messageId,
+  ) async {
     try {
       final user = ref.read(authRepositoryProvider).currentUser;
 
@@ -132,16 +135,14 @@ class ChatController extends _$ChatController {
           .read(transactionRepositoryProvider)
           .addTransaction(uid: user.uid, transaction: transaction);
 
-      final confirmMessage = ChatMessage(
-        id: const Uuid().v4(),
-        content:
-            'Done! I\'ve added this to your records. '
-            'Keep up the good tracking! 🎉',
-        role: MessageRole.model,
-        timestamp: DateTime.now(),
-      );
+      // Mark the message as saved
+      state = state.map((msg) {
+        if (msg.id == messageId) {
+          return msg.copyWith(isSaved: true);
+        }
+        return msg;
+      }).toList();
 
-      state = [...state, confirmMessage];
       return true;
     } catch (e) {
       return false;

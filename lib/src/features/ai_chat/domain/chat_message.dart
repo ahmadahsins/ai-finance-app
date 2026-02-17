@@ -12,6 +12,7 @@ class ChatMessage {
   final TransactionModel? parsedTransaction;
   final Uint8List? imageBytes;
   final bool isLoading;
+  final bool isSaved;
 
   const ChatMessage({
     required this.id,
@@ -21,6 +22,7 @@ class ChatMessage {
     this.parsedTransaction,
     this.imageBytes,
     this.isLoading = false,
+    this.isSaved = false,
   });
 
   ChatMessage copyWith({
@@ -31,6 +33,7 @@ class ChatMessage {
     TransactionModel? parsedTransaction,
     Uint8List? imageBytes,
     bool? isLoading,
+    bool? isSaved,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class ChatMessage {
       parsedTransaction: parsedTransaction ?? this.parsedTransaction,
       imageBytes: imageBytes ?? this.imageBytes,
       isLoading: isLoading ?? this.isLoading,
+      isSaved: isSaved ?? this.isSaved,
     );
   }
 }

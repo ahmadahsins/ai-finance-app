@@ -17,6 +17,7 @@ class ScaffoldWithNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: navigationShell,
       floatingActionButton: Container(
         height: 72,
@@ -33,44 +34,46 @@ class ScaffoldWithNavbar extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        color: AppColors.surface,
-        surfaceTintColor: Colors.transparent,
-        height: 70,
-        padding: EdgeInsets.zero,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavbarIcon(
-              icon: Icons.home_rounded,
-              label: 'Home',
-              isSelected: navigationShell.currentIndex == 0,
-              onTap: () => _goBranch(0),
+      bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom > 0
+          ? null
+          : BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8,
+              color: AppColors.surface,
+              surfaceTintColor: Colors.transparent,
+              height: 70,
+              padding: EdgeInsets.zero,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavbarIcon(
+                    icon: Icons.home_rounded,
+                    label: 'Home',
+                    isSelected: navigationShell.currentIndex == 0,
+                    onTap: () => _goBranch(0),
+                  ),
+                  _NavbarIcon(
+                    icon: Icons.history_rounded,
+                    label: 'History',
+                    isSelected: navigationShell.currentIndex == 1,
+                    onTap: () => _goBranch(1),
+                  ),
+                  const SizedBox(width: 48),
+                  _NavbarIcon(
+                    icon: Icons.chat_bubble_rounded,
+                    label: 'Chat',
+                    isSelected: navigationShell.currentIndex == 2,
+                    onTap: () => _goBranch(2),
+                  ),
+                  _NavbarIcon(
+                    icon: Icons.person_rounded,
+                    label: 'Profile',
+                    isSelected: navigationShell.currentIndex == 3,
+                    onTap: () => _goBranch(3),
+                  ),
+                ],
+              ),
             ),
-            _NavbarIcon(
-              icon: Icons.history_rounded,
-              label: 'History',
-              isSelected: navigationShell.currentIndex == 1,
-              onTap: () => _goBranch(1),
-            ),
-            const SizedBox(width: 48),
-            _NavbarIcon(
-              icon: Icons.chat_bubble_rounded,
-              label: 'Chat',
-              isSelected: navigationShell.currentIndex == 2,
-              onTap: () => _goBranch(2),
-            ),
-            _NavbarIcon(
-              icon: Icons.person_rounded,
-              label: 'Profile',
-              isSelected: navigationShell.currentIndex == 3,
-              onTap: () => _goBranch(3),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
